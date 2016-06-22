@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Source\Dll.cpp" />
+    <ClCompile Include="Source\RoBOTson.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\RoBOTson.h" />
+    <ClInclude Include="Source\Commander\Commander.h">
+      <Filter>Commander</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SubCommanders\ScoutsSC.h">
+      <Filter>SubCommanders</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SubCommanders\UnitsSC.h">
+      <Filter>SubCommanders</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\SubCommanders\WorkersSC.h">
+      <Filter>SubCommanders</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\MapNavigator.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\Medic.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\BaseUnit.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\UnitSet.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\Marine.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\SCV.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\Building.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\Squad.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Units\UnitFactory.h">
+      <Filter>Units</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Commander">
+      <UniqueIdentifier>{24a0eda3-c564-4444-9d5f-d62093c94540}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SubCommanders">
+      <UniqueIdentifier>{1eb875b1-0180-4b83-8f12-e081e0125b69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{fd5c063d-b4e2-4115-b9fb-ac654d773a0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Units">
+      <UniqueIdentifier>{2db1ed29-ba24-48e2-adb4-c6e05a5fc593}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

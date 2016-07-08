@@ -1,5 +1,8 @@
 #pragma once
 #include <BWAPI.h>
+#include "Util\GlobalBlackBoard.h"
+#include "General\General.h"
+#include "Units\SCV.h"
 
 // Remember not to use "Broodwar" in any global class constructor!
 
@@ -26,4 +29,6 @@ public:
   virtual void onUnitComplete(BWAPI::Unit unit);
   // Everything below this line is safe to modify.
 
+  static DWORD WINAPI thisShouldBeAClassButImTooLazyToDoIt_Worker(LPVOID param);
+  static DWORD WINAPI GeneralOrManagerOrGerenteOrSomethingLikeThat(LPVOID param);
 };

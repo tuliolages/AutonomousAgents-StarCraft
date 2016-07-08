@@ -41,6 +41,12 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\Starcraft\bwapi-data\AI</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\Starcraft\bwapi-data\AI</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -90,14 +96,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Agent\Agent.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
+    <ClCompile Include="Source\General\General.cpp" />
     <ClCompile Include="Source\RoBOTson.cpp" />
+    <ClCompile Include="Source\Units\SCV.cpp" />
+    <ClCompile Include="Source\Util\GlobalBlackBoard.cpp" />
+    <ClCompile Include="Source\Util\Inbox.cpp" />
+    <ClCompile Include="Source\Util\Message.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Commander\Commander.h" />
-    <ClInclude Include="Source\SubCommanders\ScoutsSC.h" />
-    <ClInclude Include="Source\SubCommanders\UnitsSC.h" />
-    <ClInclude Include="Source\SubCommanders\WorkersSC.h" />
+    <ClInclude Include="Source\Agent\Agent.h" />
+    <ClInclude Include="Source\Commanders\WorkersCommander.h" />
+    <ClInclude Include="Source\General\General.h" />
     <ClInclude Include="Source\Units\BaseUnit.h" />
     <ClInclude Include="Source\Units\Building.h" />
     <ClInclude Include="Source\Units\Marine.h" />
@@ -106,8 +117,11 @@
     <ClInclude Include="Source\Units\Squad.h" />
     <ClInclude Include="Source\Units\UnitFactory.h" />
     <ClInclude Include="Source\Units\UnitSet.h" />
-    <ClInclude Include="Source\Util\MapNavigator.h" />
+    <ClInclude Include="Source\Util\GlobalBlackBoard.h" />
+    <ClInclude Include="Source\Util\Inbox.h" />
     <ClInclude Include="Source\RoBOTson.h" />
+    <ClInclude Include="Source\Util\MapNavigator.h" />
+    <ClInclude Include="Source\Util\Message.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

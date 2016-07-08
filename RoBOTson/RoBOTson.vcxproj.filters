@@ -3,24 +3,27 @@
   <ItemGroup>
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\RoBOTson.cpp" />
+    <ClCompile Include="Source\Units\SCV.cpp">
+      <Filter>Units</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\General\General.cpp">
+      <Filter>General</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\GlobalBlackBoard.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\Inbox.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\Message.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Agent\Agent.cpp">
+      <Filter>Agent</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RoBOTson.h" />
-    <ClInclude Include="Source\Commander\Commander.h">
-      <Filter>Commander</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\SubCommanders\ScoutsSC.h">
-      <Filter>SubCommanders</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\SubCommanders\UnitsSC.h">
-      <Filter>SubCommanders</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\SubCommanders\WorkersSC.h">
-      <Filter>SubCommanders</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Util\MapNavigator.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Units\Medic.h">
       <Filter>Units</Filter>
     </ClInclude>
@@ -45,19 +48,43 @@
     <ClInclude Include="Source\Units\UnitFactory.h">
       <Filter>Units</Filter>
     </ClInclude>
+    <ClInclude Include="Source\General\General.h">
+      <Filter>General</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Commanders\WorkersCommander.h">
+      <Filter>Commanders</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\GlobalBlackBoard.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\MapNavigator.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Message.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Inbox.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agent\Agent.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Commander">
-      <UniqueIdentifier>{24a0eda3-c564-4444-9d5f-d62093c94540}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SubCommanders">
-      <UniqueIdentifier>{1eb875b1-0180-4b83-8f12-e081e0125b69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Utils">
-      <UniqueIdentifier>{fd5c063d-b4e2-4115-b9fb-ac654d773a0e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Units">
       <UniqueIdentifier>{2db1ed29-ba24-48e2-adb4-c6e05a5fc593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="General">
+      <UniqueIdentifier>{3a045c9c-8dc2-4d86-a508-1a7bb0865ac8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Commanders">
+      <UniqueIdentifier>{7eee6246-e269-4af5-8394-883a2c60d6c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{91ff900c-ff37-42d5-a47b-98df133e09dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Agent">
+      <UniqueIdentifier>{9bcd48b7-8019-40af-90c1-009e9a038d80}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

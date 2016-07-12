@@ -35,13 +35,19 @@ public:
 	/** SCV is needed to attack an enemy nearby. */
 	static const int ATTACKING = 6;
 
-	SCV(Unit unit, HANDLE ghMutex);
+	SCV(Unit unit, HANDLE ghMutex, int id);
 	
 	virtual ~SCV();
 
 	static DWORD WINAPI run(LPVOID param);
 
 	void startMyThread();
+
+	void checkInbox();
+
+	bool isBuilt();
+
+	bool buildSpotExplored();
 };
 
 #endif

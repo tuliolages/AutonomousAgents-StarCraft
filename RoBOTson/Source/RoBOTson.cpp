@@ -8,6 +8,8 @@ using namespace Filter;
 // AA: Do a blackboard, don't use it directly! (or at least don't use it static, use a singleton)
 HANDLE ghMutex;
 
+int id_seq = 0;
+
 void ExampleAIModule::onStart()
 {
 
@@ -146,7 +148,7 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
 	// For each created unit...
 	if (unit->getType().isWorker()) { // or  == BWAPI::UnitTypes::Terran_SCV if terran
-		SCV* scv = new SCV(unit, ghMutex);
+		SCV* scv = new SCV(unit, ghMutex, id_seq++);
 		General::getInstance()->agentSet->insert(scv);
 		Broodwar << "I have " << General::getInstance()->agentSet->size() << " agents!" << std::endl;
 	}
@@ -154,9 +156,12 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 	//CreateThread(NULL, 0, thisShouldBeAClassButImTooLazyToDoIt_Worker, (LPVOID)unit, 0, NULL);
 	// You can do a direct comparison like  == BWAPI::UnitTypes::Terran_Command_Center too.
 	else if (unit->getType().isResourceDepot()) {
-		General::getInstance(unit, ghMutex);
+		General::getInstance(unit, ghMutex, id_seq++);
 		//general = new General(unit, ghMutex);
 		//CreateThread(NULL, 0, GeneralOrManagerOrGerenteOrSomethingLikeThat, (LPVOID)unit, 0, NULL);
+	}
+	else if (unit->getType() == UnitTypes::Terran_Barracks) {
+		General::getInstance()->barracks = unit;
 	}
 }
 

@@ -7,7 +7,7 @@ Agent::Agent()
 
 }
 
-Agent::Agent(Unit mUnit, HANDLE mutex)
+Agent::Agent(Unit mUnit, HANDLE mutex, int id)
 {
 
 }
@@ -28,11 +28,6 @@ DWORD WINAPI Agent::run(LPVOID param)
 }
 
 void Agent::sendMessage(int type, int code, Agent receiver, string message)
-{
-
-}
-
-void Agent::checkInbox()
 {
 
 }

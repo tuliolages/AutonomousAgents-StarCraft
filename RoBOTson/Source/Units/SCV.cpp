@@ -1,6 +1,9 @@
 #include "SCV.h"
 
-SCV::SCV(Unit mUnit, HANDLE ghMutex)
+int frames = 0;
+TilePosition target;
+BWAPI::UnitType bui_type;
+SCV::SCV(Unit mUnit, HANDLE ghMutex, int id)
 {
 	Broodwar->sendText("A SCV came to existence!");
 	unitID = mUnit->getID();
@@ -9,6 +12,7 @@ SCV::SCV(Unit mUnit, HANDLE ghMutex)
 	unit = mUnit;
 	unithMutex = ghMutex;
 	this->startMyThread();
+	this->id = id;
 
 }
 
@@ -17,8 +21,57 @@ SCV::~SCV()
 
 }
 
-void checkInbox() {
-
+void SCV::checkInbox() {
+	SCV* worker = (SCV*)this;
+	
+	for (auto &m : worker->inbox)
+	{
+		//if (m->type == 4) // Request
+		//{
+			if (m->code == 1) // Distance to sent unit && it's free
+			{
+				//TilePosition targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, unit->getTilePosition());
+				//if (targetBuildLocation)
+				//{
+				// Order the builder to construct the supply structure
+				//supplyBuilder->build(supplyProviderType, targetBuildLocation);
+				double distance = General::getInstance()->unit->getDistance(unit);
+				// Send response
+				int isFree = unit->isIdle() ? 1 : 0;
+				General::getInstance()->inbox.insert(new Message(2, 1, worker->id, 1, -1, 0, std::make_tuple(distance, isFree)));
+				
+				Broodwar << "General sent: " << m->type << " " << m->code << std::endl;
+				//}
+			}
+			else if (m->code == 2 && m->senderType == 0)
+			{
+				Broodwar << "General order" << std::endl;
+				General::getInstance()->inbox.insert(new Message(2, 1, worker->id, 1, -1, 0, true));
+				TilePosition targetBuildLocation;
+				if (m->building == 1)
+				{
+					bui_type = UnitTypes::Terran_Supply_Depot;
+					targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, worker->unit->getTilePosition());
+				}
+				else if (m->building == 2) {
+					bui_type = UnitTypes::Terran_Barracks;
+					targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Barracks, worker->unit->getTilePosition());
+				}
+				
+				if (targetBuildLocation)
+				{
+					target = targetBuildLocation;
+					// Order the builder to construct the supply structure
+					//Position toMove = Position(target.x * 32 + 16, target.y * 32 + 16);
+					//worker->unit->rightClick(toMove);
+					worker->state = MOVE_TO_SPOT;
+				}
+			}
+			worker->inbox.erase(m);
+			worker->checkInbox();
+			return;
+		//}
+	}
 }
 
 DWORD WINAPI SCV::run(void* param)
@@ -52,31 +105,7 @@ DWORD WINAPI SCV::run(void* param)
 		if (dwWaitResult == WAIT_OBJECT_0 || dwWaitResult == WAIT_ABANDONED) //RAII
 		{
 			
-			for (auto &m : worker->inbox.inbox)
-			{
-				if (m->type == 4) // Request
-				{
-					if (m->code == 1) // Distance to sent unit && it's free
-					{
-						//TilePosition targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, unit->getTilePosition());
-						//if (targetBuildLocation)
-						//{
-							// Order the builder to construct the supply structure
-							//supplyBuilder->build(supplyProviderType, targetBuildLocation);
-						double distance = General::getInstance()->unit->getDistance(unit);
-							// Send response
-						int isFree = unit->isIdle() ? 1 : 0;
-						General::getInstance()->inbox.inbox.push_back(new Message(2, 1, 1, 0, std::make_tuple(distance, isFree)));
-						if (c == 0) {
-							c++;
-							Broodwar << "MESSAGEEEEEEEEEEEEEEE: " << m->code << std::endl;
-						}
-
-						//worker->inbox.inbox.erase(std::remove(worker->inbox.inbox.begin(), worker->inbox.inbox.end(), m), worker->inbox.inbox.end());
-						//}
-					}
-				}
-			}
+			worker->checkInbox();
 
 			// Acts accordng to current state
 			if (worker->state == GATHER_MINERALS)
@@ -113,11 +142,37 @@ DWORD WINAPI SCV::run(void* param)
 			}
 			if (worker->state == CONSTRUCT)
 			{
+				General::getInstance()->isTryingToBuild = false;
+				if (worker->isBuilt()) {
+					worker->state = GATHER_MINERALS;
+					//Broodwar << "Going to build depot!! -n" << std::endl;
+				}
 
 			}
 			if (worker->state == MOVE_TO_SPOT)
 			{
+				General::getInstance()->isTryingToBuild = true;
+				if (!worker->buildSpotExplored())
+				{
+					Position toMove = Position(target.x * 32 + 16, target.y * 32 + 16);
+					worker->unit->rightClick(toMove);
+				}
 
+				if (worker->buildSpotExplored() && !worker->unit->isConstructing())
+				{
+					//UnitType supplyProviderType = General::getInstance()->unit->getType().getRace().getSupplyProvider();
+					bool ok = unit->build(bui_type, target); 
+					//Broodwar << "Ill build? " << (ok ? "yes" : "no") << std::endl;
+					if (!ok)
+					{
+						
+					}
+				}
+
+				if (unit->isConstructing())
+				{
+					worker->state = CONSTRUCT;
+				}
 			}
 			if (worker->state == REPAIRING)
 			{
@@ -132,6 +187,28 @@ DWORD WINAPI SCV::run(void* param)
 			Sleep(10); // Some agents can sleep more than others. 
 		}
 	}
+}
+
+bool SCV::buildSpotExplored()
+{
+	int sightDist = 64;
+
+	double dist = unit->getPosition().getDistance(Position(target));
+	if (dist > sightDist)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool SCV::isBuilt()
+{
+	if (unit->isConstructing()) return false;
+
+	Unit b = unit->getTarget();
+	if (b != NULL) if (b->getRemainingBuildTime() > 0) return false;
+
+	return true;
 }
 
 void SCV::startMyThread()

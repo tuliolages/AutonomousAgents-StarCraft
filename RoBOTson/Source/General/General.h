@@ -21,18 +21,23 @@ protected:
 	bool needsBarracks;
 	queue <BWAPI::UnitType> buildPlan;
 	bool buildMessageSent;
+	bool buildOrderMessageSent;
+	double shortestDistance;
+	int idShortestDistance;
 
 public:
 	AgentSet* agentSet;
 	int x;
+	bool isTryingToBuild;
+	BWAPI::Unit barracks;
 
 	General();
 
-	General(Unit unit, HANDLE mutex);
+	General(Unit unit, HANDLE mutex, int id);
 
 	virtual ~General();
 
-	static General* getInstance(Unit unit, HANDLE handler);
+	static General* getInstance(Unit unit, HANDLE handler, int id);
 
 	static General* getInstance();
 
@@ -41,6 +46,8 @@ public:
 	static DWORD WINAPI run(LPVOID param);
 
 	void startMyThread();
+
+	void checkInbox();
 };
 
 #endif

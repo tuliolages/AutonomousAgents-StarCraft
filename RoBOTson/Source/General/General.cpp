@@ -12,7 +12,7 @@ General::General()
 	this->started = false;
 }
 
-General::General(Unit mUnit, HANDLE ghMutex)
+General::General(Unit mUnit, HANDLE ghMutex, int id)
 {
 	Broodwar->sendText("A general came to existence!");
 	this->unitID = mUnit->getID();
@@ -27,6 +27,10 @@ General::General(Unit mUnit, HANDLE ghMutex)
 	this->needsBarracks = false;
 	this->buildPlan.push(UnitTypes::Terran_Supply_Depot);
 	this->buildMessageSent = false;
+	this->id;
+	this->buildOrderMessageSent = false;
+	this->isTryingToBuild = false;
+	this->barracks = NULL;
 }
 
 General* General::getInstance()
@@ -38,12 +42,12 @@ General* General::getInstance()
 	return instance;
 }
 
-General* General::getInstance(Unit u, HANDLE h)
+General* General::getInstance(Unit u, HANDLE h, int id)
 {
 	Broodwar << "uh oh..." << std::endl;
 	if (instance == NULL)
 	{
-		instance = new General(u, h);
+		instance = new General(u, h, id);
 	}
 	else if (!instance->started) {
 		Broodwar->sendText("A general started to run!");
@@ -56,7 +60,13 @@ General* General::getInstance(Unit u, HANDLE h)
 		instance->hasBarracks = false;
 		instance->needsBarracks = false;
 		instance->buildPlan.push(UnitTypes::Terran_Supply_Depot);
+		instance->buildPlan.push(UnitTypes::Terran_Supply_Depot);
+		instance->buildPlan.push(UnitTypes::Terran_Barracks);
 		instance->buildMessageSent = false;
+		instance->id = id;
+		instance->buildOrderMessageSent = false;
+		instance->isTryingToBuild = false;
+		instance->barracks = NULL;
 	}
 
 	return instance;
@@ -65,6 +75,34 @@ General* General::getInstance(Unit u, HANDLE h)
 General::~General()
 {
 	this->instance = NULL;
+}
+
+void General::checkInbox()
+{
+	General* unitClass = (General*)this;
+	// Checks buildplan responses
+	if (!unitClass->buildPlan.empty() && unitClass->buildMessageSent)
+	{
+		for (auto &m : unitClass->inbox)
+		{
+			if (m->receiverType == 0 && m->code == 1 && m->type == 2)
+			{
+				// Read and delete.
+				int dist = std::get<0>(m->messageContentD);
+				unitClass->idShortestDistance = dist < unitClass->shortestDistance ? m->senderID : unitClass->idShortestDistance;
+				unitClass->shortestDistance = dist < unitClass->shortestDistance ? dist : unitClass->shortestDistance;
+				Broodwar << "Somebody wants to build stuff!!! " << unitClass->shortestDistance << std::endl;
+			}
+			else if (m->receiverType == 0 && m->code == 2)
+			{
+				unitClass->buildOrderMessageSent = true;
+				
+			}
+			unitClass->inbox.erase(m);
+			unitClass->checkInbox();
+			return;
+		}
+	}
 }
 
 DWORD WINAPI General::run(void* param)
@@ -86,7 +124,7 @@ DWORD WINAPI General::run(void* param)
 	*/
 
 	int count = 0;
-
+	int lele = 0;
 	while (true){
 
 		dwWaitResult = WaitForSingleObject(
@@ -104,89 +142,96 @@ DWORD WINAPI General::run(void* param)
 
 			int noMessages = 0;
 			static int lastCheckedBuildPlanMsgs = 0;
+			static int waitForWorkers = 0;
 
-			if (count == 0)
-				Broodwar << "kkk" << unitClass->buildPlan.empty() << std::endl;
-			lastCheckedBuildPlanMsgs += (lastCheckedBuildPlanMsgs > 1000) ? 0 : Broodwar->getFrameCount() - lastCheckedBuildPlanMsgs;
-			if (count++ == 0)
-				Broodwar << "jjj" << (unitClass->buildMessageSent ? "yes" : "no") << std::endl;
-			// Checks buildplan
-			if (!unitClass->buildPlan.empty() && !unitClass->buildMessageSent)
+			lastCheckedBuildPlanMsgs += (lastCheckedBuildPlanMsgs > 400) ? 0 : Broodwar->getFrameCount() - lastCheckedBuildPlanMsgs;
+			waitForWorkers = Broodwar->getFrameCount();
+
+			int workers = 0;
+			int marines = 0;
+			AgentSet* agents = unitClass->getAgents();
+			for (auto &a : *agents)
 			{
+				if (a->type.isWorker()) {
+					workers++;
+				}
+				else if (a->type == UnitTypes::Terran_Marine)
+				{
+					marines++;
+				}
+			}
+
+			// Checks buildplan
+			if (!unitClass->buildPlan.empty() && !unitClass->buildMessageSent && waitForWorkers > 100 && !unitClass->isTryingToBuild && workers >= (10 + lele))
+			{
+				unitClass->shortestDistance = 999999;
+
 				// Asks for units to build it
 				Broodwar << "Sending message" << std::endl;
 				AgentSet* agents = unitClass->getAgents();
 				for (auto &a : *agents)
 				{
 					if (a->type.isWorker()) {
-						Message* msg = new Message(4, 1, 0, 1);
-						a->inbox.inbox.push_back(msg);
+						Message* msg = new Message(4, 1, unitClass->id, 0, -1, 1);
+						a->inbox.insert(msg);
 						noMessages++;
 					}
 				}
 				if (noMessages >= 0)
 				{
 					unitClass->buildMessageSent = true;
+					unitClass->buildOrderMessageSent = false;
 					Broodwar << "sent to " << noMessages << std::endl;
 				}
 				lastCheckedBuildPlanMsgs = 0;
 			}
+			
+			if (lastCheckedBuildPlanMsgs > 400 && !unitClass->buildOrderMessageSent && unitClass->buildMessageSent) {
+				unitClass->checkInbox();
 
-			// Checks buildplan responses
-			if (!unitClass->buildPlan.empty() && unitClass->buildMessageSent && lastCheckedBuildPlanMsgs > 1000)
-			{
-				for (auto &m : unitClass->inbox.inbox)
+				if (unitClass->shortestDistance < 999999)
 				{
-					if (m->receiver == 0)
+					AgentSet* agents = unitClass->getAgents();
+					for (auto &a : *agents)
 					{
-						// Read and delete.
-						Broodwar << "Somebody wants to build stuff!!!" << std::endl;
-						unitClass->inbox.inbox.erase(std::remove(unitClass->inbox.inbox.begin(), unitClass->inbox.inbox.end(), m), unitClass->inbox.inbox.end());
+						if (a->type.isWorker() && a->id == unitClass->idShortestDistance) {
+							int building_code = 1;
+							if (unitClass->buildPlan.front() == UnitTypes::Terran_Barracks) {
+								building_code = 2;
+							}
+							Broodwar << "please build this" << unitClass->buildPlan.front() << std::endl;
+							Message* msg = new Message(1, 2, unitClass->id, 0, a->id, 1, building_code);
+							a->inbox.insert(msg);
+						}
 					}
 				}
+				lastCheckedBuildPlanMsgs = 0;
+				unitClass->buildOrderMessageSent = true;
 			}
 
-			if (hq->isIdle() && !hq->train(hq->getType().getRace().getWorker()))
-			{
-				// If that fails, get error
-				Error lastErr = Broodwar->getLastError();
+			if (lastCheckedBuildPlanMsgs > 100 && unitClass->buildOrderMessageSent && unitClass->buildMessageSent) {
+				unitClass->checkInbox();
+				Broodwar << "I guess its ok now" << std::endl;
+				lele += 2;
+				unitClass->buildPlan.pop();
+				unitClass->buildOrderMessageSent = false;
+				unitClass->buildMessageSent = false;
+			}
 
-				// Retrieve the supply provider type in the case that we have run out of supplies
-				UnitType supplyProviderType = hq->getType().getRace().getSupplyProvider();
-				static int lastChecked = 0;
-
-				// If we are supply blocked and haven't tried constructing more recently
-				if (lastErr == Errors::Insufficient_Supply &&
-					lastChecked + 400 < Broodwar->getFrameCount() &&
-					Broodwar->self()->incompleteUnitCount(supplyProviderType) == 0)
+			if (workers < 15 && !unitClass->isTryingToBuild) {
+				if (hq->isIdle() && !hq->train(hq->getType().getRace().getWorker()))
 				{
-					lastChecked = Broodwar->getFrameCount();
-					lastCheckedBuildPlanMsgs = Broodwar->getFrameCount();
 
-					// Retrieve a unit that is capable of constructing the supply needed
-					Unit supplyBuilder = hq->getClosestUnit(GetType == supplyProviderType.whatBuilds().first &&
-						(IsIdle || IsGatheringMinerals) &&
-						IsOwned);
-					// If a unit was found
-					if (supplyBuilder)
+				} // closure: failed to train idle unit
+			}
+			else if (marines < 10 && !unitClass->isTryingToBuild) {
+				if (unitClass->barracks != NULL) {
+					if (hq->isIdle() && !unitClass->barracks->train(UnitTypes::Terran_Marine))
 					{
-						if (supplyProviderType.isBuilding())
-						{
-							TilePosition targetBuildLocation = Broodwar->getBuildLocation(supplyProviderType, supplyBuilder->getTilePosition());
-							if (targetBuildLocation)
-							{
-								// Order the builder to construct the supply structure
-								supplyBuilder->build(supplyProviderType, targetBuildLocation);
-							}
-						}
-						else
-						{
-							// Train the supply provider (Overlord) if the provider is not a structure
-							supplyBuilder->train(supplyProviderType);
-						}
-					} // closure: supplyBuilder is valid
-				} // closure: insufficient supply
-			} // closure: failed to train idle unit
+
+					} // closure: failed to train idle unit
+				}
+			}
 			// Release ownership of the mutex object
 			if (!ReleaseMutex(unithMutex))
 			{

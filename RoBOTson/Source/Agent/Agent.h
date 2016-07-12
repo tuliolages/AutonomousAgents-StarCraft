@@ -28,13 +28,14 @@ public:
 	Unit unit;
 	UnitType type;
 	TilePosition goal;
-	int unitID;
+	int unitID; //type id
+	int id;
 
 	Inbox inbox;
 	/** Default constructor. Not used. */
 	Agent();
 	/** Constructor. */
-	Agent(Unit mUnit, HANDLE mutex);
+	Agent(Unit mUnit, HANDLE mutex, int id);
 	/** Destructor. */
 	virtual ~Agent();
 	/** Thread initialization */
@@ -42,7 +43,6 @@ public:
 	/** Thread execution */
 	static DWORD WINAPI run(LPVOID param);
 	void sendMessage(int type, int code, Agent receiver, string message);
-	void checkInbox();
 };
 
 #endif

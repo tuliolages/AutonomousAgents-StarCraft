@@ -24,6 +24,9 @@
     <ClCompile Include="Source\Agent\AgentSet.cpp">
       <Filter>Agent</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Units\Marine.cpp">
+      <Filter>Units</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RoBOTson.h" />

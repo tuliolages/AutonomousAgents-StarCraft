@@ -101,6 +101,7 @@
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\General\General.cpp" />
     <ClCompile Include="Source\RoBOTson.cpp" />
+    <ClCompile Include="Source\Units\Marine.cpp" />
     <ClCompile Include="Source\Units\SCV.cpp" />
     <ClCompile Include="Source\Util\GlobalBlackBoard.cpp" />
     <ClCompile Include="Source\Util\Inbox.cpp" />

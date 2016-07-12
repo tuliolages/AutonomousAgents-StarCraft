@@ -152,16 +152,17 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 		General::getInstance()->agentSet->insert(scv);
 		Broodwar << "I have " << General::getInstance()->agentSet->size() << " agents!" << std::endl;
 	}
-		//Add to general unit set
-	//CreateThread(NULL, 0, thisShouldBeAClassButImTooLazyToDoIt_Worker, (LPVOID)unit, 0, NULL);
-	// You can do a direct comparison like  == BWAPI::UnitTypes::Terran_Command_Center too.
-	else if (unit->getType().isResourceDepot()) {
+	else if (unit->getType().isResourceDepot())
+	{
 		General::getInstance(unit, ghMutex, id_seq++);
-		//general = new General(unit, ghMutex);
-		//CreateThread(NULL, 0, GeneralOrManagerOrGerenteOrSomethingLikeThat, (LPVOID)unit, 0, NULL);
 	}
-	else if (unit->getType() == UnitTypes::Terran_Barracks) {
+	else if (unit->getType() == UnitTypes::Terran_Barracks)
+	{
 		General::getInstance()->barracks = unit;
+	}
+	else if (unit->getType() == UnitTypes::Terran_Marine)
+	{
+		
 	}
 }
 

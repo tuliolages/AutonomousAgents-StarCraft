@@ -1,8 +1,11 @@
 #ifndef __MESSAGE_H__
 #define __MESSAGE_H__
 
-//#include "..\Agent\Agent.h"
+#include "BWAPI.h"
 #include <string>
+#include <tuple>
+
+using namespace BWAPI;
 
 /** Forward declaration */
 class Agent;
@@ -16,14 +19,17 @@ class Message {
 public:
 	int type;
 	int code;
-	//Agent sender;
-	//Agent receiver;
-	std::string message;
+	int sender;
+	int receiver;
+	std::tuple <BWAPI::TilePosition, int> messageContentP;
+	std::tuple <double, int> messageContentD;
 
 	/** Constructor - not used */
 	Message();
 	/** Constructor */
-	Message(int type, int code/* Agent sender, Agent receiver, */, std::string message);
+	Message(int type, int code, int sender, int receiver, std::tuple<BWAPI::TilePosition, int> messageContent);
+	Message(int type, int code, int sender, int receiver, std::tuple<double, int> messageContent);
+	Message(int type, int code, int sender, int receiver);
 };
 
 #endif

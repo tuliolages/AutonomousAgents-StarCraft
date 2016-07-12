@@ -21,6 +21,9 @@
     <ClCompile Include="Source\Agent\Agent.cpp">
       <Filter>Agent</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Agent\AgentSet.cpp">
+      <Filter>Agent</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\RoBOTson.h" />
@@ -60,14 +63,17 @@
     <ClInclude Include="Source\Util\MapNavigator.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Util\Message.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Util\Inbox.h">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\Agent\Agent.h">
       <Filter>Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Agent\AgentSet.h">
+      <Filter>Agent</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Message.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

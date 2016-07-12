@@ -17,13 +17,19 @@ SCV::~SCV()
 
 }
 
+void checkInbox() {
+
+}
+
 DWORD WINAPI SCV::run(void* param)
 {
-	SCV* unitClass = (SCV*)param;
-	BWAPI::Unit unit = unitClass->unit;
-	HANDLE unithMutex = unitClass->unithMutex;
+	SCV* worker = (SCV*)param;
+	BWAPI::Unit unit = worker->unit;
+	HANDLE unithMutex = worker->unithMutex;
 
 	DWORD dwWaitResult;
+
+	int c = 0;
 
 	while (true){
 
@@ -45,28 +51,78 @@ DWORD WINAPI SCV::run(void* param)
 
 		if (dwWaitResult == WAIT_OBJECT_0 || dwWaitResult == WAIT_ABANDONED) //RAII
 		{
-			// if our worker is idle
-			if (unit->isIdle())
+			
+			for (auto &m : worker->inbox.inbox)
 			{
-				// Order workers carrying a resource to return them to the center,
-				// otherwise find a mineral patch to harvest.
-				if (unit->isCarryingGas() || unit->isCarryingMinerals())
+				if (m->type == 4) // Request
 				{
-					unit->returnCargo();
-				}
-				else if (!unit->getPowerUp())  // The worker cannot harvest anything if it
-				{                             // is carrying a powerup such as a flag
-					// Harvest from the nearest mineral patch or gas refinery
-					BWAPI::Unit tempu = unit->getClosestUnit(
-						BWAPI::Filter::IsMineralField || BWAPI::Filter::IsRefinery);
-					if (tempu != NULL && !unit->gather(tempu))
+					if (m->code == 1) // Distance to sent unit && it's free
 					{
-						// If the call fails, then print the last error message
-						// Broodwar << Broodwar->getLastError() << std::endl;
-					}
+						//TilePosition targetBuildLocation = Broodwar->getBuildLocation(UnitTypes::Terran_Supply_Depot, unit->getTilePosition());
+						//if (targetBuildLocation)
+						//{
+							// Order the builder to construct the supply structure
+							//supplyBuilder->build(supplyProviderType, targetBuildLocation);
+						double distance = General::getInstance()->unit->getDistance(unit);
+							// Send response
+						int isFree = unit->isIdle() ? 1 : 0;
+						General::getInstance()->inbox.inbox.push_back(new Message(2, 1, 1, 0, std::make_tuple(distance, isFree)));
+						if (c == 0) {
+							c++;
+							Broodwar << "MESSAGEEEEEEEEEEEEEEE: " << m->code << std::endl;
+						}
 
-				} // closure: has no powerup
-			} // closure: if idle
+						//worker->inbox.inbox.erase(std::remove(worker->inbox.inbox.begin(), worker->inbox.inbox.end(), m), worker->inbox.inbox.end());
+						//}
+					}
+				}
+			}
+
+			// Acts accordng to current state
+			if (worker->state == GATHER_MINERALS)
+			{
+
+				if (unit->isIdle())
+				{
+					// Order workers carrying a resource to return them to the center,
+					// otherwise find a mineral patch to harvest.
+					if (unit->isCarryingMinerals())
+					{
+						unit->returnCargo();
+					}
+					else if (!unit->getPowerUp())  // The worker cannot harvest anything if it
+					{                              // is carrying a powerup such as a flag
+						// Harvest from the nearest mineral patch or gas refinery
+						BWAPI::Unit tempu = unit->getClosestUnit(BWAPI::Filter::IsMineralField);
+						if (tempu != NULL && !unit->gather(tempu))
+						{
+							// If the call fails, then print the last error message
+							// Broodwar << Broodwar->getLastError() << std::endl;
+						}
+
+					} // closure: has no powerup
+				} // closure: if idle
+			}
+			if (worker->state == GATHER_GAS)
+			{
+
+			}
+			if (worker->state == ATTACKING)
+			{
+
+			}
+			if (worker->state == CONSTRUCT)
+			{
+
+			}
+			if (worker->state == MOVE_TO_SPOT)
+			{
+
+			}
+			if (worker->state == REPAIRING)
+			{
+
+			}
 
 			if (!ReleaseMutex(unithMutex))
 			{

@@ -5,6 +5,7 @@
 #include <BWAPI.h>
 #include "..\Util\GlobalBlackBoard.h"
 #include "..\Agent\Agent.h"
+#include "..\General\General.h"
 
 using namespace BWAPI;
 

@@ -21,16 +21,16 @@ using namespace std;
 class Agent {
 
 protected:
+	HANDLE unithMutex;//currently using the global handle mutex
+	vector<int> readMessasIDs;
+
+public:
 	Unit unit;
 	UnitType type;
 	TilePosition goal;
 	int unitID;
 
-	HANDLE unithMutex;//currently using the global handle mutex
-
 	Inbox inbox;
-
-public:
 	/** Default constructor. Not used. */
 	Agent();
 	/** Constructor. */

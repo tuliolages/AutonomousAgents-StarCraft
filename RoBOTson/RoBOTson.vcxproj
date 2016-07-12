@@ -97,6 +97,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Agent\Agent.cpp" />
+    <ClCompile Include="Source\Agent\AgentSet.cpp" />
     <ClCompile Include="Source\Dll.cpp" />
     <ClCompile Include="Source\General\General.cpp" />
     <ClCompile Include="Source\RoBOTson.cpp" />
@@ -107,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Agent\Agent.h" />
+    <ClInclude Include="Source\Agent\AgentSet.h" />
     <ClInclude Include="Source\Commanders\WorkersCommander.h" />
     <ClInclude Include="Source\General\General.h" />
     <ClInclude Include="Source\Units\BaseUnit.h" />

@@ -145,14 +145,19 @@ void ExampleAIModule::onUnitHide(BWAPI::Unit unit)
 void ExampleAIModule::onUnitCreate(BWAPI::Unit unit)
 {
 	// For each created unit...
-	if (unit->getType().isWorker()) // or  == BWAPI::UnitTypes::Terran_SCV if terran
-		new SCV(unit, ghMutex);
+	if (unit->getType().isWorker()) { // or  == BWAPI::UnitTypes::Terran_SCV if terran
+		SCV* scv = new SCV(unit, ghMutex);
+		General::getInstance()->agentSet->insert(scv);
+		Broodwar << "I have " << General::getInstance()->agentSet->size() << " agents!" << std::endl;
+	}
 		//Add to general unit set
 	//CreateThread(NULL, 0, thisShouldBeAClassButImTooLazyToDoIt_Worker, (LPVOID)unit, 0, NULL);
 	// You can do a direct comparison like  == BWAPI::UnitTypes::Terran_Command_Center too.
-	else if (unit->getType().isResourceDepot())
-		new General(unit, ghMutex);
+	else if (unit->getType().isResourceDepot()) {
+		General::getInstance(unit, ghMutex);
+		//general = new General(unit, ghMutex);
 		//CreateThread(NULL, 0, GeneralOrManagerOrGerenteOrSomethingLikeThat, (LPVOID)unit, 0, NULL);
+	}
 }
 
 void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit)
@@ -176,72 +181,3 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit)
 {
 }
 
-
-DWORD WINAPI ExampleAIModule::GeneralOrManagerOrGerenteOrSomethingLikeThat(LPVOID param){
-
-	BWAPI::Unit hq = static_cast<BWAPI::Unit>(param);
-	DWORD dwWaitResult;
-
-	while (true){
-
-		dwWaitResult = WaitForSingleObject(
-			ghMutex,    // handle to mutex
-			100);  // time-out interval
-
-		if (GlobalBlackBoard::GameOver || hq == NULL || !hq->exists()) {
-			ReleaseMutex(ghMutex);
-			return 0; // end thread
-		}
-		// Some things are commom between units, so you can apply a little of OO here.
-
-		if (dwWaitResult == WAIT_OBJECT_0 || dwWaitResult == WAIT_ABANDONED)
-		{
-			if (hq->isIdle() && !hq->train(hq->getType().getRace().getWorker()))
-			{
-				// If that fails, get error
-				Error lastErr = Broodwar->getLastError();
-
-				// Retrieve the supply provider type in the case that we have run out of supplies
-				UnitType supplyProviderType = hq->getType().getRace().getSupplyProvider();
-				static int lastChecked = 0;
-
-				// If we are supply blocked and haven't tried constructing more recently
-				if (lastErr == Errors::Insufficient_Supply &&
-					lastChecked + 400 < Broodwar->getFrameCount() &&
-					Broodwar->self()->incompleteUnitCount(supplyProviderType) == 0)
-				{
-					lastChecked = Broodwar->getFrameCount();
-
-					// Retrieve a unit that is capable of constructing the supply needed
-					Unit supplyBuilder = hq->getClosestUnit(GetType == supplyProviderType.whatBuilds().first &&
-						(IsIdle || IsGatheringMinerals) &&
-						IsOwned);
-					// If a unit was found
-					if (supplyBuilder)
-					{
-						if (supplyProviderType.isBuilding())
-						{
-							TilePosition targetBuildLocation = Broodwar->getBuildLocation(supplyProviderType, supplyBuilder->getTilePosition());
-							if (targetBuildLocation)
-							{
-								// Order the builder to construct the supply structure
-								supplyBuilder->build(supplyProviderType, targetBuildLocation);
-							}
-						}
-						else
-						{
-							// Train the supply provider (Overlord) if the provider is not a structure
-							supplyBuilder->train(supplyProviderType);
-						}
-					} // closure: supplyBuilder is valid
-				} // closure: insufficient supply
-			} // closure: failed to train idle unit
-			// Release ownership of the mutex object
-			if (!ReleaseMutex(ghMutex))
-			{
-				// Handle error.
-			}
-		}
-		Sleep(20);
-	}
-}
